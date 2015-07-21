@@ -1,0 +1,172 @@
+/*
+ * =====================================================================================
+ *
+ *       Filename:  interface.cpp
+ *
+ *    Description:  interface that is the main controller
+ *
+ *        Version:  1.0
+ *        Created:  Thursday 23 April 2015 06:30:50  IST
+ *       Revision:  none
+ *       Compiler:  gcc
+ *
+ *         Author:  Suman Roy (), 
+ *   Organization:  Cognizant Technological solutions
+ *
+ * =====================================================================================
+*/
+
+#include"interface.hpp"
+
+using namespace __resilience__;
+
+/* 
+ * ===  FUNCTION  ======================================================================
+ *         Name:  init
+ *  Description:  initialise the environment... read env variable and update bandwidh ip 
+ *  port....
+ * =====================================================================================
+ */
+bool __resilience__::Interface::init(){
+
+	std::cout<<"\nInit from env_variable\n";
+
+	bool    returnVal;
+
+	returnVal =regEnv::RegisterEnv::doRegister();
+	return returnVal;
+	
+}
+
+/* 
+ * ===  FUNCTION  ======================================================================
+ *         Name:  init
+ *  Description:  register a new created socket 
+ * =====================================================================================
+ */
+
+bool __resilience__::Interface::init ( int sockFd , uint32_t port ){
+	std::cout<<"\nregister a created socket\n";
+	bool  returnVal;
+
+	int upLimit = getInitUpLimit ( port );
+	int downLimit = getInitDownLimit ( port );
+
+ 
+
+	returnVal = fd::Fd::init( sockFd , port , upLimit , downLimit);
+	return returnVal;
+}
+//todo-- remove this method
+long long __resilience__::Interface::getPreTime( int delay , int bytes ){
+	long devider = delay * 1024;
+	long long time = bytes * 1000000L;
+	time /=devider;
+	return time;
+}	
+
+/* 
+ * ===  FUNCTION  ======================================================================
+ *         Name:  readSleep
+ *  Description:  implement the thread/process slepp(for socket buffer read depending on
+ *  bandwidth and readTime
+ * =====================================================================================
+ */
+bool __resilience__::Interface::readSleep( struct timeval startTime , struct timeval endTime , unsigned int fd , int totalCount ){
+	std::cout<<"\nFunction:"<<__FUNCTION__<<std::endl;
+#ifdef DEBUG
+	std::cout<<__FUNCTION__<<"StartTime.sec["<<startTime.tv_sec<<"]"
+		<<"StrartTime.u_sec["<<startTime.tv_usec<<
+		"\nEndTime.sec["<<endTime.tv_sec<<"] Endtime.u_sec["<<endTime.tv_usec
+		<<"\nFileDescriptor["<<fd<<"]TotalDataRead["<<totalCount<<std::endl;
+#endif
+	float timeToDownload = ( ( endTime.tv_sec * 1000000  + endTime.tv_usec ) - ( startTime.tv_sec * 1000000 + startTime.tv_usec ) );
+	unsigned int downLimit = getDownLimit( fd );
+#ifdef DEBUG
+	std::cout<<"\n DownLimit :["<<downLimit<<"]\n";
+#endif
+	float expectedtime = ( double ) totalCount * 8 / downLimit;
+	expectedtime *= 1000;
+	float delay = expectedtime - timeToDownload;
+#ifdef DEBUG
+	std::cout<<"\nTimeToDownload["<<timeToDownload<<"]--[ExpectedTime:["<<expectedtime<<"]--Delay:["<<delay<<"]\n";
+#endif
+	if ( delay > 0 ) {
+		std::cout<<"\nSleeping for:["<<delay<<"]\n";
+		usleep( delay );
+		return true;
+	}
+	return false;
+}
+	
+
+/* 
+ * ===  FUNCTION  ======================================================================
+ *         Name:  writeSleep
+ *  Description:  implenet the process/thread sleep methodology depending on write data
+ *  to the net buffer and desired bandwidth limit.
+ * =====================================================================================
+ */
+bool __resilience__::Interface::writeSleep( struct timeval startTime , struct timeval endTime , unsigned int fd , int totalCount ){
+	std::cout<<"\nFunction:"<<__FUNCTION__<<std::endl;
+#ifdef DEBUG
+	std::cout<<__FUNCTION__<<"StartTime.sec["<<startTime.tv_sec<<"]"
+		<<"StrartTime.u_sec["<<startTime.tv_usec<<
+		"\nEndTime.sec["<<endTime.tv_sec<<"] Endtime.u_sec["<<endTime.tv_usec
+		<<"\nFileDescriptor["<<fd<<"]TotalDataWriten["<<totalCount<<std::endl;
+#endif
+	float timeToDownload = ( ( endTime.tv_sec * 1000000  + endTime.tv_usec ) - ( startTime.tv_sec * 1000000 + startTime.tv_usec ) );
+	unsigned int upLimit = getUpLimit( fd );
+#ifdef DEBUG
+	std::cout<<"\n Uplimmit:["<<upLimit<<"]\n";
+#endif
+	float expectedtime = ( double ) totalCount * 8 / upLimit;
+	expectedtime *= 1000;
+	float delay = expectedtime - timeToDownload;
+#ifdef DEBUG
+	std::cout<<"\nTimeToDownload["<<timeToDownload<<"]--[ExpectedTime:["<<expectedtime<<"]--Delay:["<<delay<<"]\n";
+#endif
+	if ( delay > 0 ) {
+		std::cout<<"\nSleeping for:["<<delay<<"]\n";
+		usleep( delay );
+		return true;
+	}
+	return false;
+}
+
+struct timespec __resilience__::Interface::returnCurrentTime(){
+	struct timespec ts;
+	//clock_gettime(CLOCK_MONOTONIC, &ts); // Works on FreeBSD
+	clock_gettime(CLOCK_REALTIME, &ts);
+	return ts;
+}
+long __resilience__::Interface::timeDifference( struct timespec oldTime , struct timespec currentTime ){
+	long timeDiff;
+	timeDiff = ( ((currentTime.tv_sec * 1000000000 ) + currentTime.tv_nsec) -( ( oldTime.tv_sec  * 1000000000 ) + oldTime.tv_nsec ) );
+	return timeDiff;
+}
+
+size_t __resilience__::Interface::getPortStatus( int port  , bool flag){
+	struct timespec currentTime;
+	size_t            byteCanHandleThisWindow;
+
+	
+	currentTime = returnCurrentTime();
+	long timeDiff = timeDifference( getTimeVal( port , flag) , currentTime );
+	if ( timeDiff > 1000000000 ){// time widow slot not present
+#ifdef DEBUG
+		std::cout<<PRINT<<"Last packet was 1sec before\n";
+#endif
+
+		if ( !flag )
+		byteCanHandleThisWindow = getInitUpLimit( port ) * 1024;
+		else byteCanHandleThisWindow = getInitDownLimit( port ) * 1024;
+	}
+	else{
+#ifdef DEBUG
+		std::cout<<PRINT<<"Get remaining byte counts for current window\n";
+#endif
+		byteCanHandleThisWindow = getRemainingByteCountForCurrentWindow( port , flag );
+	}
+	return byteCanHandleThisWindow;
+}

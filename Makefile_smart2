@@ -1,0 +1,15 @@
+.PHONY : clean
+
+CPPFLAGS= -fPIC -g -std=c++11 -ldl -Wall -Wextra -fpermissive -fpic -Wwrite-strings -lm
+LDFLAGS= -shared -std=c++0x
+
+SOURCES = $(shell echo *.cpp)
+	HEADERS = $(shell echo *.hpp)
+	OBJECTS=$(SOURCES:.cpp=.o)
+TARGET= libc.so.6
+
+all:	$(TARGET)
+clean:
+	rm -f $(OBJECTS) $(TARGET)
+$(TARGET) : $(OBJECTS)
+	$(CC) $(CFLAGS) $(OBJECTS) -o $@ $(LDFLAGS)

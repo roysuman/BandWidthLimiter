@@ -1,0 +1,9 @@
+{
+	"NoPort":2,
+	"Port":"5000:8888:",
+	"DownLimits":"256:1024:",
+	"UpLoadLimits":"512:1024:",
+	"Latency":"234:421:",
+	"IpcServerIp":"127.0.0.1",
+	"IpcServerPort":8888
+}

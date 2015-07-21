@@ -1,0 +1,41 @@
+.\" Manpage for Resilience.
+.\" Contact suman.roy@cognizant.com to correct errors or typos.
+.TH man 8 "14 May 2015" "1.0" "resilience man page"
+.SH NAME
+resilience \- network bandwidth emulator
+.SH SYNOPSIS
+resilience [ set environment ] [ programm for bandwidth limit]
+
+ example (1) ./resilience -i 192.168.7.9 -p 3060 -u 200 -d 300 ./mysql
+
+.SH DESCRIPTION
+Resilience is used to limit bandwidth for a programm.
+.PP
+(1)Mandatory arguments
+   programm name for which resilience will limit bandwidth
+.PP
+(2) Optional arguments
+ -i, -I  Destination Ip address for which resilience need to limit bandwodth. On absence of this flag resilience 
+         will consider default ip i.e. ( 127.0.0.1) [ to add multiple ips, use ';' ]
+ -p, -P  Port for which resilience should provide bandwidth limitation. Default port ( 5000 ).
+         Use ';' separatior for multiple ports.
+ -u, -U  Upload limit, default value is (-1) ,[ which indicates no bandwidth limitation for Upload.]
+ -d, -D  Downlioad limit, default value is (-1 ), which indicates no download limit.
+ -l, -L  License info
+ -v, -V  version 
+ -h, -H  Help
+
+.SH EXITSTATUS
+ 0   if Ok
+ 1   if Error
+
+.SH REPORTING BUGS
+ Report resilience bug to suman.roy@cognizant.com
+
+.SH BUGS
+No known bugs.
+.SH COPYRIGHT
+Copyright ©2015 Cognizant Technological Solutions.
+This is free software: you are free to change and redistribute it. There is NO WARRANTY, to the extent permitted by law.
+.SH AUTHOR
+Suman Roy (suman.roy@cognizant.com)
