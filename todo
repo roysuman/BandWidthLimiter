@@ -1,4 +1,0 @@
-ERROR: on ipc
-buffer:
- maintain the uplimit of buffer pool size.
- if some write data request comes into buffer cache but buffer cache and available buffer size is less that required and buffer incriment is not possible then return no of bytes abled to write into buffer.
