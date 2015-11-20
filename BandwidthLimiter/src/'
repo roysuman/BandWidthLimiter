@@ -1,0 +1,549 @@
+/*
+ * =====================================================================================
+ *
+ *       Filename:  overload.c
+ *
+ *    Description:  overload all glibc socket methodes
+ *
+ *        Version:  1.0
+ *        Created:  Friday 17 April 2015 11:51:41  IST
+ *       Revision:  none
+ *       Compiler:  gcc
+ *
+ *         Author:  Suman Roy (), 
+ *   Organization:  Cognizant Technological solutions
+ *
+ * =====================================================================================
+ */
+#include "interface.h"
+
+char                       *__error__;
+#define __FUNCTION_DECLARE_(funcName, returnType, arguments)\
+       	static returnType (*libc_##funcName) arguments
+
+
+#define __LOAD__ADDR__( var ) do {\
+	*(void **) (&libc_##var) = dlsym ( __handle__ , #var); \
+	if ( ( __error__ = dlerror ( ) ) != NULL ){\
+		std::cerr<<__error__<<std::endl;\
+		exit ( -1 );	}	\
+} while (0)
+#define CONTROLLER_OPS ins_cont_str.controller_ops
+#define SOCK_STR ins_cont_str.soc_str
+#define SOCK_STR_OPS ins_cont_str.soc_str.sock_ops
+#define ENV_STR ins_cont_str.reg_env_str
+#define ENV_STR_OPS REG_STR.env_ops
+
+static void                       *__handle__;
+bool                       __isDelay__ = false;
+std::map < int , bool >    __registeredSock__;
+static bool                __pass__ = false;
+static bool                ipcServerInit= false;
+static controller_struct    ins_cont_str;
+/* all socket layer method 
+ */
+
+__FUNCTION_DECLARE_(dup, int, (int));
+__FUNCTION_DECLARE_(close, int, (int));
+__FUNCTION_DECLARE_(dup2, int, (int, int));
+__FUNCTION_DECLARE_(connect, int ,( int , const struct sockaddr* , socklen_t) );
+__FUNCTION_DECLARE_(socket, int, (int, int, int));
+__FUNCTION_DECLARE_(dup3, int, (int, int , int ));
+__FUNCTION_DECLARE_(read, ssize_t, (int, void *, size_t));
+__FUNCTION_DECLARE_(poll, int, (struct pollfd *, int, int));
+__FUNCTION_DECLARE_(recv, ssize_t, (int, void *, size_t, int));
+__FUNCTION_DECLARE_(write, ssize_t, (int,const void *, size_t));
+__FUNCTION_DECLARE_(send, ssize_t, (int, const void *, size_t, int));
+__FUNCTION_DECLARE_(readv, ssize_t, (int, const struct iovec *, int));
+__FUNCTION_DECLARE_(writev, ssize_t, (int, const struct iovec *, int));
+__FUNCTION_DECLARE_(accept, int, (int, struct sockaddr *, socklen_t *));
+__FUNCTION_DECLARE_ ( bind , int ,(int , const struct sockaddr* , socklen_t ) );
+__FUNCTION_DECLARE_(select, int, (int, fd_set *, fd_set *, fd_set *, struct timeval *));
+__FUNCTION_DECLARE_(sendto, ssize_t, (int, const void *, size_t, int,
+	    const struct sockaddr *, socklen_t));
+__FUNCTION_DECLARE_(recvfrom, ssize_t, (int, void *, size_t, int, struct sockaddr *,
+	    socklen_t *));
+/* 
+ * ===  FUNCTION  ======================================================================
+ *         Name:  init_overload
+ *  Description:  make the environemnt ready........
+ * =====================================================================================
+ */
+//extern "C" 
+//
+static void close_dl( void * handle){
+	char*    err_str;
+
+	__isDelay__ = false;
+	__pass__ = false;
+
+	if (  dlcose( handle ) != 0 ){
+		err_str = dlerror();
+		if (err_str != NULL)
+			fprintf( stderr ,"A dynamic linking error occurred: (%s)\n", err_str);
+	}
+	return;
+}
+static void 
+init_overload(){
+
+	char*   glibc_path;
+	char *err_str
+	
+	if ( !__isDelay__ ){
+		__isDelay__ = true;
+		__pass__ = true;
+		glibc_path = getenv("RESILIENCE_GLIBC_PATH") ;
+		if ( ( __handle__ = dlopen(glibc_path.c_str() ,RTLD_LAZY ) ) == NULL ){
+			err_str = dlerror();
+			if (err_str != NULL)
+				fprintf( stderr ,"A dynamic linking error occurred: (%s)\n", err_str);
+			exit ( EXIT_FAILURE );
+		}
+		__LOAD__ADDR__ ( socket );
+		__LOAD__ADDR__( close );
+		__LOAD__ADDR__ ( read );
+		__LOAD__ADDR__ ( recv );
+		__LOAD__ADDR__ ( readv);
+		__LOAD__ADDR__ ( recvfrom );
+		__LOAD__ADDR__ ( write );
+		__LOAD__ADDR__ ( send );
+		__LOAD__ADDR__ ( writev );
+		__LOAD__ADDR__ ( sendto );
+		__LOAD__ADDR__ ( select );
+		__LOAD__ADDR__ ( poll );
+		__LOAD__ADDR__ ( accept );
+		__LOAD__ADDR__ ( dup );
+		__LOAD__ADDR__( dup2 );
+		__LOAD__ADDR__( dup3 );
+		__LOAD__ADDR__ ( bind );
+		__LOAD__ADDR__ ( connect );
+		__pool__ = ObjectPool::getInstance();
+		init = __pool__->getInterfaceObj();
+		if (__init_env__ (ins_cont_str )  ){
+			fprintf(stderr ,"Resilience_Bandwidth_Limitor init terminated\n");
+			close_dl( __handle__ );
+		}
+		//TODO register function for at exit
+		//atexit(deallocFunc);
+	}
+#ifdef DEBUG
+	fprintf(stdout,"Environment initialization for Resilience_Bandwidth_Limitor Done\n");
+#endif
+	return;
+}
+
+/*-----------------------------------------------------------------------------
+ *  all the below methodes are a wrapper for libc sock methodes..
+ *  to understand the method description plese do "man methodName"
+ *-----------------------------------------------------------------------------*/
+int 
+socket( int domain , int type , int protocol ){
+#ifdef DEBUG
+	std::cout<<PRINT<<std::endl;
+#endif	
+	int    fd;
+	
+	if ( !__pass__  ) init_overload();
+
+	fd = ( *libc_socket ) ( domain, type , protocol );
+#ifdef DEBUG
+	fprintf(stdout,"Socket created sock_id [ %d ] :\n",fd);
+#endif
+	return ( fd );
+}
+
+int 
+close ( int fd ){ 
+
+	int    ret_val;
+	ret_val = (*libc_close)(fd);
+	while ( ! SOCK_STR_OPS.unregister_socket_descriptor(SOCK_STR, fd ) ) ; //loop untill sock not closed... if it loop continious..it's a bug
+	return ret_val;
+}
+ 
+ 
+ssize_t 
+read( int fd , void *buff , size_t count ){
+	
+	ssize_t                      read_count;
+	ssize_t                      byte_read_acceptable;
+	
+#ifdef DEBUG
+	fprintf(stdout, "Read request for acp_socket_fd [ %d ]\n",fd );
+#endif
+	if ( __isDelay__ ){
+		byte_read_acceptable = count;
+		read_count = CONTROLLER_OPS.pre_op_read(ins_cont_str, fd , buff, 
+				byte_read_acceptable );
+			if ( read_count == -1 ){/* buffer empty*/ 
+				read_count = (*libc_read)(fd , buff , count );
+			}
+			CONTROLLER_OPS.update_time( ins_cont_str , fd , true );
+	}else read_count = (*libc_read)(fd , buff , count );
+	return read_count;
+}
+
+
+ssize_t 
+recv( int fd , void* buff , size_t len, int flags ){
+	__resilience__::Interface    *intObj;
+	ssize_t                      read_count;
+	ssize_t                      byte_read_acceptable;
+#ifdef DEBUG
+	fprintf(stdout, "recv request for acp_socket_fd [ %d ]\n",fd );
+#endif
+
+	if ( __isDelay__ ){
+		byte_read_acceptable = len;
+		read_count = CONTROLLER_OPS.pre_op_read(ins_cont_str, fd , buff, 
+				byte_read_acceptable );
+			if ( read_count == -1 ){/* buffer empty*/ 
+				read_count = (*libc_read)(fd , buff , len );
+			}
+			CONTROLLER_OPS.update_time( ins_cont_str , fd , true );
+	}else read_count = (*libc_read)(fd , buff , len );
+
+	return read_count;
+
+}
+
+//no need any delay logic.. becayse it's calling read method only.. see kernel source
+ssize_t 
+readv( int __fd__ , const struct iovec* __iovec__ , int __iovCount__){
+	ssize_t    read_count;
+#ifdef DEBUG
+	fprintf(stdout, "readv request for acp_socket_fd [ %d ]\n",fd );
+#endif
+
+	read_count = (*libc_readv )(__fd__ , __iovec__ , __iovCount__ );
+	return read_count;
+}
+
+ssize_t 
+recvfrom ( int fd, void* buff , size_t len , int flags , struct sockaddr * from , 
+		socklen_t *fromlen ){
+
+	ssize_t                      read_count;
+	ssize_t                      byte_read_acceptable;
+#ifdef DEBUG
+	fprintf(stdout, "recvfrom request for acp_socket_fd [ %d ]\n",fd );
+#endif
+
+	if ( __isDelay__ ){
+		byte_read_acceptable = len;
+		read_count = CONTROLLER_OPS.pre_op_read(ins_cont_str, fd , buff, 
+				byte_read_acceptable );
+		if ( read_count == -1 ){/* buffer empty */
+			read_count = (*libc_recvfrom )( fd , buff , len , 
+					flags , from , fromlen );
+		}
+		CONTROLLER_OPS.update_time( ins_cont_str , fd , true );
+	}else read_count  = (*libc_recvfrom )( fd , buff , len , flags , 
+			from , fromlen );
+
+	return read_count;
+}
+
+ssize_t 
+write(int fd ,const void * buff, size_t len ){
+
+	bool       pass_one;
+	ssize_t    byte_send;
+	ssize_t    send_count;
+	ssize_t    no_of_bytes; 
+	
+#ifdef DEBUG
+	fprintf(stdout,"write socket call for acp_fd [ %d ] of size [ %zu ]\n",fd ,len );
+#endif
+
+	no_of_bytes = 1;
+
+	if ( __isDelay__ ){
+		byte_send = 0;
+		pass_one = true;
+		char temp_buff [ len +1 ];
+		memcpy ( temp_buff , buff , len );
+		while ( no_of_bytes  > 0 ){
+
+			send_count = CONTROLLER_OPS.pre_op_send (ins_cont_str, fd , temp_buff, len , pass_one );
+			if ( send_count > 0 ){
+				no_of_bytes = (*libc_write)(fd  , temp_buff , send_count );
+				byte_send +=no_of_bytes;
+				//update time
+				CONTROLLER_OPS.update_time( ins_cont_str , fd , false );
+#ifdef DEBUG
+				fprintf(stdout,"[%zd] bytes send to kernel buffer for write\n",no_of_bytes);
+#endif
+			}else    	no_of_bytes = 0;
+			if ( byte_send > ( ssize_t ) len ) {
+			       fprintf(stderr,"THIS SITUATION SHOULD NOT   OCCUR\n");
+			       no_of_bytes = 0;
+			}
+		}
+	}else byte_send  = (*libc_write)(fd  , buff , len  );
+
+#ifdef DEBUG
+	fprintf(stdout ,"[%zd ]BYTE FORWARDED TO KERNEL BUFFER \n",byte_send);
+#endif
+	return byte_send ;
+}
+
+
+ssize_t 
+send(int fd , const void * buff , size_t len , int  flags ){
+	bool       pass_one;
+	ssize_t    byte_send;
+	ssize_t    send_count;
+	ssize_t    no_of_bytes; 
+	
+#ifdef DEBUG
+	fprintf(stdout,"write socket call for acp_fd [ %d ] of size [ %zu ]\n",fd ,len );
+#endif
+
+	no_of_bytes = 1;
+
+	if ( __isDelay__ ){
+		byte_send = 0;
+		pass_one = true;
+		char temp_buff [ len +1 ];
+		memcpy ( temp_buff , buff , len );
+		while ( no_of_bytes  > 0 ){
+
+			send_count = CONTROLLER_OPS.pre_op_send (ins_cont_str, fd , temp_buff, len , pass_one );
+			if ( send_count > 0 ){
+				no_of_bytes = (*libc_write)(fd  , temp_buff , send_count, flags );
+				byte_send +=no_of_bytes;
+				//update time
+				CONTROLLER_OPS.update_time( ins_cont_str , fd , false );
+#ifdef DEBUG
+				fprintf(stdout,"[%zd] bytes send to kernel buffer for write\n",no_of_bytes);
+#endif
+			}else    	no_of_bytes = 0;
+			if ( byte_send > ( ssize_t ) len ) {
+			       fprintf(stderr,"THIS SITUATION SHOULD NOT   OCCUR\n");
+			       no_of_bytes = 0;
+			}
+		}
+	}else byte_send  = (*libc_write)(fd  , buff , len  , flags);
+
+#ifdef DEBUG
+	fprintf(stdout ,"[%zd ]BYTE FORWARDED TO KERNEL BUFFER \n",byte_send);
+#endif
+	return byte_send ;
+}
+//no need , because it's calling write method only... see kernel source
+ssize_t 
+writev(int fd , const struct iovec * iovec , int iovCount ){
+	if ( !__pass__ ) init_overload();
+	ssize_t    no_of_bytes;
+	no_of_bytes = (*libc_writev )( fd , iovec , iovCount );
+	return no_of_bytes;
+}
+
+ssize_t 
+sendto(int fd ,  const  void *buff, size_t len, int flags,
+		const struct sockaddr *dest_addr, socklen_t addr_len ){
+
+	bool       pass_one;
+	ssize_t    byte_send;
+	ssize_t    send_count;
+	ssize_t    no_of_bytes;
+
+	no_of_bytes = 1;
+
+	byte_send = 0;
+	pass_one = true;
+	if ( __isDelay__ ){
+			char temp_buff [ len ];
+			memcpy ( temp_buff , buff , len );
+			__resilience__::Interface    *intObj = __pool__->getInterfaceObj();
+		while ( no_of_bytes  > 0 ){
+			intObj->readWriteLock( fd , false , true );
+			send_count = preOpSend ( fd , temp_buff, len , pass_one );
+			 if ( send_count > 0 ){
+				 no_of_bytes = (*libc_send)( fd  , 
+						 temp_buff , send_count , flags , dest_addr , addr_len);
+				 byte_send +=no_of_bytes;
+				 //update time
+				intObj->updateTime( fd , false);
+
+			 } else no_of_bytes = 0;
+			 if ( byte_send >= (ssize_t )len ) no_of_bytes = 0;
+			 intObj->readWriteLock( fd , false , false );
+		}
+		__pool__->returnInterfaceObj( intObj );
+	} else byte_send =  (*libc_send)( fd  , buff , len , flags , dest_addr , addr_len);
+
+	return byte_send ;
+}
+
+int 
+select(int nfds , fd_set * read_fds, fd_set * write_fds, fd_set *exceptfds, 
+		struct timeval * timeout){
+
+	if ( !__pass__ ) init_overload();
+
+	int   noFd;
+	noFd = (*libc_select)( nfds , read_fds , write_fds , exceptfds , timeout );
+
+	return noFd;
+}
+
+int 
+poll(struct pollfd *fds, nfds_t nfds, int timeout){
+
+	if ( !__pass__ ) init_overload();
+
+	int    return_val;
+
+	return_val = (*libc_poll )( fds , nfds , timeout );
+	
+	return ( return_val );
+}
+int 
+accept(int fd, struct sockaddr *addr, socklen_t *addr_len){
+	int   acp_fd;
+	if ( !__pass__ ) init_overload();
+
+	acp_fd = (*libc_accept )( fd , addr , addr_len );
+#ifdef DEBUG
+	fprintf( stdout ,"Org_fd [ %d ] ..acceptedFd [ %d ] \n",fd,acp_fd);
+#endif
+	if ( __isDelay__ ){
+		//for ipcServer
+		if ( !SOCK_STR_OPS.register_sock( SOCK_STR, fd , acp_fd )				)
+			acp_fd = -1;
+	}
+	return acp_fd;
+}
+/* 
+int 
+dup(int oldfd){
+	if ( !__pass__ ) init_overload();
+
+	__resilience__::Interface    *intObj;
+	int                          return_val;
+
+	return_val = (*libc_dup )( oldfd );
+	if ( return_val != -1 && __isDelay__  ){
+
+		intObj = __pool__->getInterfaceObj();
+		intObj->registerSock( oldfd  , return_val ); // update the accepted fd
+		__pool__->returnInterfaceObj( intObj );
+	}
+
+	return return_val;
+ }
+
+int 
+dup2(int oldfd, int newfd){
+	if ( !__pass__ ) init_overload();
+
+	__resilience__::Interface    *intObj;
+	int                          return_val;
+
+	return_val = (*libc_dup2 )( oldfd , newfd );
+	if ( return_val != -1 && __isDelay__ ){
+		intObj = __pool__->getInterfaceObj();
+		intObj->registerSock( oldfd  , return_val ); // update the accepted fd
+		__pool__->returnInterfaceObj( intObj );
+	}
+
+
+	return return_val;
+}
+
+int 
+dup3(int oldfd, int newfd, int flags){
+	if ( !__pass__ ) init_overload();
+
+	__resilience__::Interface    *intObj;
+	int                          return_val;
+
+	return_val = (*libc_dup3 )( oldfd , newfd , flags);
+	if ( return_val != -1 && __isDelay__ ){
+		
+		intObj = __pool__->getInterfaceObj();
+		intObj->registerSock( oldfd  , return_val ); // update the accepted fd
+		__pool__->returnInterfaceObj( intObj );
+	}
+
+	return return_val;
+}
+*/
+int 
+bind(int fd, const struct sockaddr *addr, socklen_t addr_len){
+#ifdef DEBUG
+	std::cout<<PRINT<<"File Descriptor [ "<<fd<<" ] \n";
+#endif
+	int                          port;
+	int                          ip_addr;
+	__resilience__::Interface    *intObj;
+	int                          return_val;
+	char                         str[INET_ADDRSTRLEN];
+
+	if ( !__pass__ ) init_overload();
+ 
+	if ( __pass__ &&  __isDelay__ ){ // environment is ready for delay
+		if (addr->sa_family == AF_INET){
+		       port = ntohs (((struct sockaddr_in*)addr)->sin_port);
+		       ip_addr = ((struct sockaddr_in*)&addr)->sin_addr.s_addr;
+		       inet_ntop( AF_INET, &ip_addr, str, INET_ADDRSTRLEN );
+		       std::string ip = std::string(str);
+		}
+		else
+			port = ntohs(((struct sockaddr_in6*)addr)->sin6_port);
+#ifdef DEBUG
+		fprintf(stdout,"socket_fd [ %d ] of port [ %zu ]\n",fd,port);
+#endif
+		CONTROLLER_OPS.regis_new_created_socket( ins_cont_str,fd ,port );
+	}//return_val == -1 ? return_val = -1: 
+	return_val = ( *libc_bind ) ( fd , addr , addr_len );
+
+	return return_val;
+
+}
+int 
+connect(int fd, const struct sockaddr *addr, socklen_t addr_len){
+#ifdef DEBUG
+	std::cout<<PRINT<<"File Descriptor [ "<<fd<<" ] \n";
+#endif
+	int                          port;
+	int                          ip_addr;
+	__resilience__::Interface    *intObj;
+	int                          return_val;
+	char                         str[INET_ADDRSTRLEN];
+
+	if ( !__pass__ ) init_overload();
+  
+	if ( __pass__ &&  __isDelay__ ){ // environment is ready for delay
+		if (addr->sa_family == AF_INET){
+		       port = ntohs (((struct sockaddr_in*)addr)->sin_port);
+		       ip_addr = ((struct sockaddr_in*)&addr)->sin_addr.s_addr;
+		       inet_ntop( AF_INET, &ip_addr, str, INET_ADDRSTRLEN );
+		       std::string ip = std::string(str);
+		}
+		else
+			port = ntohs(((struct sockaddr_in6*)addr)->sin6_port);
+#ifdef DEBUG
+		fprintf(stdout,"socket_fd [ %d ] of port [ %zu ]\n",fd,port);
+#endif
+		if ( !CONTROLLER_OPS.regis_new_created_socket( ins_cont_str,fd ,port ) ){
+			fprintf(stderr ," acp_sock FD [%d ] not able to register \n ",fd);
+		}//TODO else if ( intObj->registerSock ( fd  , fd ) ) // update the accepted fd
+	}
+	return_val = ( *libc_connect ) ( fd , addr , addr_len );
+
+	return return_val;
+
+}
+/*    
+int main(){
+	init_overload();
+
+
+	return 0;
+
+}
+*/
