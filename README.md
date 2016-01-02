@@ -43,6 +43,7 @@ I have used iperf ( a google tool) to test this tool.
 #Example
 
 - Server Side
+ I have limited server side bandwidth by 1 Mbps
 
 <img src="PrtSc/1.png" height="400" alt="ServerSide"/> 
 
@@ -59,6 +60,8 @@ TCP window size: 2.50 MByte (default)
 [ ID] Interval       Transfer     Bandwidth
 [  3]  0.0-10.0 sec  18.5 MBytes  15.5 Mbits/sec
 
+- without any bandwidth limitation iperf server receives packet by 32.7 Gbits/sec
+- I was able to limit the bandwidth under multiple thread also.
 
 ---------------------------------------------------
 
