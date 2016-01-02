@@ -50,11 +50,11 @@ I have used iperf ( a google tool) to test this tool.
 
 MY_PROJECT/BandWidthLimiter# iperf -c 127.0.0.1 -p 5000
 
-------------------------------------------------------------
+
 Client connecting to 127.0.0.1, TCP port 5000
 TCP window size: 2.50 MByte (default)
 
-------------------------------------------------------------
+
 [  3] local 127.0.0.1 port 55151 connected with 127.0.0.1 port 5000
 [ ID] Interval       Transfer     Bandwidth
 [  3]  0.0-10.0 sec  18.5 MBytes  15.5 Mbits/sec
