@@ -46,7 +46,7 @@ I have used iperf ( a google tool) to test this tool.
 
 MY_PROJECT/BandWidthLimiter# ./blimiter -p 5000 -u 1024 -d 1024 -c "iperf -s -p 5000 -i 1" -g "/lib/x86_64-linux-gnu/libc.so.6"
 
-IpAddress[ 127.0.0.1 ] 
+IpAddress[ 127.0.0.1 ]
 Port[ 5000]
 UpLimit [ 1024 ]
 DownLimit [ 1024 ]
@@ -55,11 +55,13 @@ Command [ iperf -s -p 5000 -i 1 ]
 
 Argv2  [ iperf ] 
 argv [ 0 ] = iperf
- argv [ 1 ] = -s
+argv [ 1 ] = -s
 Port [ 5000 ] registerd 
+
 ------------------------------------------------------------
 Server listening on TCP port 5000
 TCP window size: 85.3 KByte (default)
+
 ------------------------------------------------------------
 [  4] local 127.0.0.1 port 5000 connected with 127.0.0.1 port 55151
 [ ID] Interval       Transfer     Bandwidth
@@ -79,13 +81,14 @@ TCP window size: 85.3 KByte (default)
 [  4] 13.0-14.0 sec  1000 KBytes  8.19 Mbits/sec
 [  4] 14.0-15.0 sec  1000 KBytes  8.19 Mbits/sec
 
-
 - ClientSide
 
 MY_PROJECT/BandWidthLimiter# iperf -c 127.0.0.1 -p 5000
+
 ------------------------------------------------------------
 Client connecting to 127.0.0.1, TCP port 5000
 TCP window size: 2.50 MByte (default)
+
 ------------------------------------------------------------
 [  3] local 127.0.0.1 port 55151 connected with 127.0.0.1 port 5000
 [ ID] Interval       Transfer     Bandwidth
