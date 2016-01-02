@@ -42,8 +42,9 @@ I have used iperf ( a google tool) to test this tool.
 
 #Example
 
-- ServerSide:
-   <img src="PrtSc/1.png" height="400" alt="ServerSide"/> 
+- Server Side
+
+<img src="PrtSc/1.png" height="400" alt="ServerSide"/> 
 
 - ClientSide:
 
