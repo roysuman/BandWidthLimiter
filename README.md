@@ -42,46 +42,10 @@ I have used iperf ( a google tool) to test this tool.
 
 #Example
 
-- ServerSide: 
+- ServerSide:
+   <img src="PrtSc/1.png" height="400" alt="ServerSide"/> 
 
-MY_PROJECT/BandWidthLimiter# ./blimiter -p 5000 -u 1024 -d 1024 -c "iperf -s -p 5000 -i 1" -g "/lib/x86_64-linux-gnu/libc.so.6"
-
-IpAddress[ 127.0.0.1 ]
-Port[ 5000]
-UpLimit [ 1024 ]
-DownLimit [ 1024 ]
-Latency [  ]
-Command [ iperf -s -p 5000 -i 1 ] 
-
-Argv2  [ iperf ] 
-argv [ 0 ] = iperf
-argv [ 1 ] = -s
-Port [ 5000 ] registerd 
-
-------------------------------------------------------------
-Server listening on TCP port 5000
-TCP window size: 85.3 KByte (default)
-
-------------------------------------------------------------
-[  4] local 127.0.0.1 port 5000 connected with 127.0.0.1 port 55151
-[ ID] Interval       Transfer     Bandwidth
-[  4]  0.0- 1.0 sec  1000 KBytes  8.19 Mbits/sec
-[  4]  1.0- 2.0 sec  1000 KBytes  8.19 Mbits/sec
-[  4]  2.0- 3.0 sec  1000 KBytes  8.19 Mbits/sec
-[  4]  3.0- 4.0 sec  1000 KBytes  8.19 Mbits/sec
-[  4]  4.0- 5.0 sec  1000 KBytes  8.19 Mbits/sec
-[  4]  5.0- 6.0 sec  1000 KBytes  8.19 Mbits/sec
-[  4]  6.0- 7.0 sec  1000 KBytes  8.19 Mbits/sec
-[  4]  7.0- 8.0 sec  1000 KBytes  8.19 Mbits/sec
-[  4]  8.0- 9.0 sec  1000 KBytes  8.19 Mbits/sec
-[  4]  9.0-10.0 sec  1000 KBytes  8.19 Mbits/sec
-[  4] 10.0-11.0 sec  1000 KBytes  8.19 Mbits/sec
-[  4] 11.0-12.0 sec  1000 KBytes  8.19 Mbits/sec
-[  4] 12.0-13.0 sec  1000 KBytes  8.19 Mbits/sec
-[  4] 13.0-14.0 sec  1000 KBytes  8.19 Mbits/sec
-[  4] 14.0-15.0 sec  1000 KBytes  8.19 Mbits/sec
-
-- ClientSide
+- ClientSide:
 
 MY_PROJECT/BandWidthLimiter# iperf -c 127.0.0.1 -p 5000
 
