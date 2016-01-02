@@ -1,20 +1,3 @@
-/*
- * =====================================================================================
- *
- *       Filename:  list.h
- *
- *    Description:  a simple double linked list
- *
- *        Version:  1.0
- *        Created:  Monday 05 October 2015 11:15:36  IST
- *       Revision:  none
- *       Compiler:  g++4.7
- *
- *         Author:  Suman Roy (){with the help of Linux kernel code}, suman.roy@cognizant.com
- *   Organization:  Cognizant Technological Solutions
- *
- * =====================================================================================
- */
 #ifndef LIST_H
 #define LIST_H
 #define LIST_POISON1  ((void *) 0x00100100)

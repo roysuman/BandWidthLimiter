@@ -1,23 +1,6 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
-/*
- * =====================================================================================
- *
- *       Filename:  bandwidth_globals.h
- *
- *    Description:  global defination for bandwiodth limiter
- *
- *        Version:  1.0
- *        Created:  Thursday 23 September 2015 10:36:34  IST
- *       Revision:  none
- *       Compiler:  gcc
- *
- *         Author:  Suman Roy (), 
- *   Organization:  Cognizant Technological solutions
- *
- * =====================================================================================
- */
 #include <stdio.h>
 #include<stdlib.h>
 #include <string.h>

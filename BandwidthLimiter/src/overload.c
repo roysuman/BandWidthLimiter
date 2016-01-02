@@ -1,20 +1,3 @@
-/*
- * =====================================================================================
- *
- *       Filename:  overload.c
- *
- *    Description:  overload all glibc socket methodes
- *
- *        Version:  1.0
- *        Created:  Friday 17 April 2015 11:51:41  IST
- *       Revision:  none
- *       Compiler:  gcc
- *
- *         Author:  Suman Roy (), 
- *   Organization:  Cognizant Technological solutions
- *
- * =====================================================================================
- */
 #include<stdio.h>
 #include <sys/types.h>
 #include <sys/socket.h>

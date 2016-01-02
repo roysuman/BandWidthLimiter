@@ -1,21 +1,3 @@
-/*
- * =====================================================================================
- *
- *       Filename:  interface.c
- *
- *    Description:  all method's defination of interface.h file
- *
- *        Version:  1.0
- *        Created:  Thursday 23 April 2015 06:30:50  IST
- *       Revision:  none
- *       Compiler:  gcc
- *
- *         Author:  Suman Roy (), 
- *   Organization:  Cognizant Technological solutions
- *
- * =====================================================================================
-*/
-
 
 #include"interface.h"
 

@@ -1,20 +1,3 @@
-/*
- * =====================================================================================
- *
- *       Filename:  registerEnv.c
- *
- *    Description:  do refister
- *
- *        Version:  1.0
- *        Created:  Saturday 25 April 2015 12:19:57  IST
- *       Revision:  none
- *       Compiler:  gcc
- *
- *         Author:  ROY (), suman.roy@cognizant.com
- *   Organization:  NA
- *
- * =====================================================================================
- */
 #include"register_env.h"
 #include "bandwidth_globals.h"
 

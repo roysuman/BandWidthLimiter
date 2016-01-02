@@ -1,20 +1,3 @@
-/*
- * =====================================================================================
- *
- *       Filename:  registerEnv.h
- *
- *    Description:  Get the port number, bandwodth limit for filtering. And 
- *                  store them into appro DS for better lookup time
- *        Version:  1.0
- *        Created:  Saturday 25 April 2015 12:17:13  IST
- *       Revision:  none
- *       Compiler:  gcc
- *
- *         Author:  ROY (), suman.roy@cognizant.com
- *   Organization:  NA
- *
- * =====================================================================================
- */
 #ifndef REGISTERENV_H__
 #define REGISTERENV_H__  
 #include<stdio.h>

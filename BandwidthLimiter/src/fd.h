@@ -1,22 +1,3 @@
-/*
- * =====================================================================================
- *
- *       Filename:  fd.h
- *
- *    Description:  This file defines the structure and methods for bookkeeping 
- *                  socket information. See fd.c for function defination
- *                  and header info.
- *
- *        Version:  1.0
- *        Created:  Thursday 23 April 2015 10:36:34  IST
- *       Revision:  none
- *       Compiler:  gcc
- *
- *         Author:  Suman Roy (), 
- *   Organization:  Cognizant Technological solutions
- *
- * =====================================================================================
- */
 
 #ifndef FD_H_
 #define FD_H_

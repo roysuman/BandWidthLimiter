@@ -1,21 +1,3 @@
-/*
- * =====================================================================================
- *
- *       Filename:  fd.c
- *
- *    Description:  This file contains all helper method and DS for
- *                  bookeeping socket information
- *
- *        Version:  1.0
- *        Created:  Thursday 23 April 2015 11:23:24  IST
- *       Revision:  none
- *       Compiler:  gcc
- *
- *         Author:  Suman Roy (), 
- *   Organization:  Cognizant Technological solutions
- *
- * =====================================================================================
- */
 #include "fd.h"
 
 /*-----------------------------------------------------------------------------

@@ -1,20 +1,3 @@
-/*
- * =====================================================================================
- *
- *       Filename:  interface.h
- *
- *    Description:  It is the entry layer. Late's call is manager. who manages everythig
- *
- *        Version:  1.0
- *        Created:  Thursday 23 April 2015 06:34:33  IST
- *       Revision:  none
- *       Compiler:  gcc
- *
- *         Author:  Suman Roy (), 
- *   Organization:  Cognizant Technological solutions
- *
- * =====================================================================================
- */
 
 #ifndef INTERFACE_H_
 #define INTERFACE_H_

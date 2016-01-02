@@ -1,20 +1,3 @@
- /* 
- * =====================================================================================
- *
- *       Filename:  resilience.c
- *
- *    Description:  the main programm
- *
- *        Version:  1.0
- *        Created:  Thursday 23 April 2015 03:09:50  IST
- *       Revision:  none
- *       Compiler:  gcc
- *
- *         Author:  Suman Roy (), 
- *   Organization:  Cognizant Technological solutions
- *
- * =====================================================================================
- */
 #define _GNU_SOURCE 1
 #include<stdbool.h>
 #include<stdio.h>

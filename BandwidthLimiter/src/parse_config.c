@@ -1,20 +1,3 @@
-/*
- * =====================================================================================
- *
- *       Filename:  parse_config.c
- *
- *    Description:  parse the config file
- *
- *        Version:  1.0
- *        Created:  Monday 05 October 2015 08:11:36  IST
- *       Revision:  none
- *       Compiler:  gcc
- *
- *         Author:  ROY (), email.suman.roy@gmail.com
- *   Organization:  NA
- *
- * =====================================================================================
- */
 #include"parse_config.h"
 
 config_struct_operations config_operations = {
